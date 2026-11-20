@@ -18,6 +18,14 @@
         "path": "gitnexus-claude-plugin"
       },
       "description": "GitNexus code intelligence: execution flows, blast radius and augmented search. Third-party, referenced from its upstream repo."
+    },
+    {
+      "name": "notion-workspace-plugin",
+      "source": {
+        "source": "github",
+        "repo": "makenotion/claude-code-notion-plugin"
+      },
+      "description": "Official Notion skills and Notion MCP server, to read task and doc links. Third-party, referenced from its upstream repo."
     }
   ]
 }
