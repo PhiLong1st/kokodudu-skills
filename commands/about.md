@@ -1,13 +1,7 @@
 ---
-name: about
-description: Shows what the kokodudu plugin contains, the commands it provides and how each one works. Read-only. Follows the Agent Skills spec, see https://agentskills.io/home
-compatibility: Designed for Claude Code.
-metadata:
-  version: "1.0"
+description: Show what the kokodudu plugin contains and its commands (read-only)
 disable-model-invocation: true
 ---
-
-# about
 
 Print the summary below as is. Change nothing, run no commands, edit no files.
 
@@ -28,5 +22,3 @@ its plan first and waits for an explicit yes.
 1. `/kokodudu:polish-code` to clean the changed code.
 2. `/kokodudu:commit` to commit it.
 3. `/kokodudu:pr` to open the pull request.
-
-Spec: https://agentskills.io/home

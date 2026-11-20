@@ -1,7 +1,7 @@
 # kokodudu skills
 
-A Claude Code plugin that is also its own marketplace. It ships four generic
-skills. Each one shows its plan and waits for your approval before it changes
+A Claude Code plugin that is also its own marketplace. It ships three generic
+skills and one command. Each one shows its plan and waits for your approval before it changes
 anything.
 
 | Skill | Command | What it does |
@@ -9,7 +9,7 @@ anything.
 | `commit` | `/kokodudu:commit` | Splits changes by topic and writes conventional commits (`type(TASK-ID): subject`, subject max 72 chars, no co-author trailer). |
 | `pr` | `/kokodudu:pr` | Pushes the branch and opens a PR using the repository's own PR template. |
 | `polish-code` | `/kokodudu:polish-code` | Fixes style violations in the changed code. Ships a bundled C# and Unity style guide. |
-| `about` | `/kokodudu:about` | Read-only summary of the plugin and its commands. |
+| `about` (command) | `/kokodudu:about` | Read-only summary of the plugin and its commands. Lives in `commands/`, not `skills/`. |
 
 All three follow the Agent Skills specification: https://agentskills.io/home
 
@@ -20,8 +20,9 @@ kokodudu-skills/
 ├── .claude-plugin/
 │   ├── plugin.json         # plugin name, version
 │   └── marketplace.json    # marketplace name, plugin list
+├── commands/
+│   └── about.md
 └── skills/
-    ├── about/SKILL.md
     ├── commit/SKILL.md
     ├── pr/SKILL.md
     └── polish-code/
