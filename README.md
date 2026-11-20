@@ -27,7 +27,7 @@ kokodudu-skills/
 │   └── init.md
 ├── hooks/
 │   ├── hooks.json          # PostToolUse hook on Bash
-│   └── gitnexus-refresh.sh # refreshes GitNexus after `git commit`
+│   └── refresh-index.sh    # refreshes GitNexus and CodeGraph after `git commit`
 └── skills/
     ├── commit/SKILL.md
     ├── pr/SKILL.md
@@ -82,11 +82,12 @@ not Claude plugins; `/kokodudu:init` sets them up instead.
 ## Hook
 
 `hooks/hooks.json` registers a `PostToolUse` hook on `Bash`. After Claude runs
-`git commit`, it refreshes the GitNexus index in the background
-(`gitnexus analyze --skip-agents-md`). It does nothing unless the repo already
-has a `.gitnexus/` folder, so run `/kokodudu:init` once per repo first. It only
-sees commits Claude makes, not commits from a terminal or IDE. Log:
-`.gitnexus/post-commit.log`.
+`git commit`, it refreshes the indexes in the background:
+`gitnexus analyze --skip-agents-md` and `codegraph sync`. Each one runs only if
+the repo already has its folder (`.gitnexus/`, `.codegraph/`), so run
+`/kokodudu:init` once per repo first. It only sees commits Claude makes, not
+commits from a terminal or IDE. Logs: `.gitnexus/post-commit.log` and
+`.codegraph/post-commit.log`.
 
 ## Notes
 

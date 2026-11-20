@@ -12,7 +12,7 @@ wait for an explicit yes, act, verify, report. Make no change before the yes.
 | Tool | Scope | What init does |
 |---|---|---|
 | GitNexus | this repo | First index (`.gitnexus/`). The plugin's hook then refreshes it after every `git commit` Claude makes. |
-| CodeGraph | this repo + your Claude Code config | Registers the CodeGraph MCP server for Claude (global), then `codegraph init` creates `.codegraph/` and builds the index. |
+| CodeGraph | this repo + your Claude Code config | Registers the CodeGraph MCP server for Claude (global), then `codegraph init` creates `.codegraph/` and builds the index. The plugin's hook then runs `codegraph sync` after every `git commit` Claude makes. |
 | Caveman | your Claude Code setup, all repos | Installs the output-compression hook and the recovery MCP server for Claude. |
 | MCP for Unity ([CoplayDev/unity-mcp](https://github.com/CoplayDev/unity-mcp)) | this repo, Unity projects only | Adds the `com.coplaydev.unity-mcp` package to `Packages/manifest.json`, pinned to a release tag. |
 
@@ -108,6 +108,6 @@ there; whether Unity resolved the package cannot be checked from here.
 One short list: per tool, done, skipped (and why) or failed. Remind the user
 that:
 
-- the GitNexus hook only fires for commits Claude makes, not for commits made
+- the GitNexus and CodeGraph refresh hook only fires for commits Claude makes, not for commits made
   in a terminal or IDE;
 - Caveman may need a new Claude Code session to take effect.
