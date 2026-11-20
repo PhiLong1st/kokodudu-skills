@@ -12,7 +12,7 @@ wait for an explicit yes, act, verify, report. Make no change before the yes.
 | Tool | Scope | What init does |
 |---|---|---|
 | GitNexus | this repo | First index (`.gitnexus/`). The plugin's hook then refreshes it after every `git commit` Claude makes. |
-| CodeGraph | this repo | `codegraph init`: creates `.codegraph/` and builds the index. |
+| CodeGraph | this repo + your Claude Code config | Registers the CodeGraph MCP server for Claude (global), then `codegraph init` creates `.codegraph/` and builds the index. |
 | Caveman | your Claude Code setup, all repos | Installs the output-compression hook and the recovery MCP server for Claude. |
 | MCP for Unity ([CoplayDev/unity-mcp](https://github.com/CoplayDev/unity-mcp)) | this repo, Unity projects only | Adds the `com.coplaydev.unity-mcp` package to `Packages/manifest.json`, pinned to a release tag. |
 
@@ -31,6 +31,13 @@ explicit yes, named as such.
 - Repo tools: does `<root>/.gitnexus/` exist? does `<root>/.codegraph/` exist?
   Is each ignored (`git check-ignore -q .gitnexus`, `git check-ignore -q
   .codegraph`)?
+- CodeGraph MCP: is a `codegraph` server already in the Claude MCP config
+  (`grep -l codegraph` on `~/.claude.json` and `~/.claude/settings.json`)?
+  Already present: skip the registration. Find the agent id for Claude Code with
+  `codegraph install --print-config claude` (it writes nothing). If `claude` is
+  not a valid id, read the valid ids from the error and pick the Claude Code
+  one; never guess, never use `--target auto` or `all`, which would also wire
+  other editors.
 - Caveman: is it already set up for Claude? Look for a caveman hook in
   `~/.claude/settings.json` and a `caveman` server in the Claude MCP config
   (`grep -l caveman` on those files). Already present: mark it done, skip it.
@@ -50,8 +57,13 @@ List each item with its scope, and mark the skipped ones and why:
 1. GitNexus: `gitnexus analyze --skip-agents-md`. The flag keeps it from
    rewriting `CLAUDE.md` and `AGENTS.md`. If `.gitnexus/` already exists, offer
    it as a refresh.
-2. CodeGraph: `codegraph init -y` (non-interactive, takes the defaults). If
-   `.codegraph/` exists already, skip.
+2. CodeGraph, two parts, each skipped if already done:
+   a. `codegraph install --target <claude id> --location global --yes`
+      registers the MCP server for Claude Code only. Say plainly that this
+      changes the user's global Claude Code config and that
+      `codegraph uninstall` undoes it.
+   b. `codegraph init -y` (non-interactive, takes the defaults) builds
+      `.codegraph/` in this repo. Skip if `.codegraph/` exists already.
 3. Caveman: `caveman hooks install claude` and `caveman mcp install claude`.
    Say plainly that these change the user's global Claude Code config, not only
    this repo, and that `caveman hooks uninstall claude` and
