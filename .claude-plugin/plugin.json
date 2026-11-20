@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "kokodudu",
+  "displayName": "kokodudu skills",
+  "version": "1.0.0",
+  "description": "Generic, approval-gated skills for everyday work: commit, pr, and polish-code.",
+  "author": {
+    "name": "kokodudu"
+  },
+  "keywords": ["git", "commit", "pull-request", "code-style", "skills"]
+}

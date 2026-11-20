@@ -1,0 +1,14 @@
+{
+  "name": "kokodudu",
+  "description": "Personal marketplace for the kokodudu skills plugin.",
+  "owner": {
+    "name": "kokodudu"
+  },
+  "plugins": [
+    {
+      "name": "kokodudu",
+      "source": "./",
+      "description": "Generic, approval-gated skills for everyday work: commit, pr, and polish-code."
+    }
+  ]
+}

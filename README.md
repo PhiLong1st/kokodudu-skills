@@ -1,0 +1,71 @@
+# kokodudu skills
+
+A Claude Code plugin that is also its own marketplace. It ships three generic
+skills. Each one shows its plan and waits for your approval before it changes
+anything.
+
+| Skill | Command | What it does |
+|---|---|---|
+| `commit` | `/kokodudu:commit` | Splits changes by topic and writes conventional commits (`type(TASK-ID): subject`, subject max 72 chars, no co-author trailer). |
+| `pr` | `/kokodudu:pr` | Pushes the branch and opens a PR using the repository's own PR template. |
+| `polish-code` | `/kokodudu:polish-code` | Fixes style violations in the changed code. Ships a bundled C# and Unity style guide. |
+
+All three follow the Agent Skills specification: https://agentskills.io/home
+
+## Layout
+
+```text
+kokodudu-skills/
+├── .claude-plugin/
+│   ├── plugin.json         # plugin name, version
+│   └── marketplace.json    # marketplace name, plugin list
+└── skills/
+    ├── commit/SKILL.md
+    ├── pr/SKILL.md
+    └── polish-code/
+        ├── SKILL.md
+        └── references/csharp-unity.md
+```
+
+## Install
+
+From a local checkout:
+
+```shell
+/plugin marketplace add ~/Projects/kokodudu-skills
+/plugin install kokodudu@kokodudu
+```
+
+From GitHub, once pushed:
+
+```shell
+/plugin marketplace add <owner>/<repo>
+/plugin install kokodudu@kokodudu
+```
+
+If the install summary says `Run /reload-plugins to activate.`, run it.
+
+Try it without installing:
+
+```bash
+claude --plugin-dir ~/Projects/kokodudu-skills
+```
+
+## Update
+
+`version` in `.claude-plugin/plugin.json` is the single source of truth.
+Updates land only when it changes, so bump it on every release.
+
+```shell
+/plugin marketplace update kokodudu
+/plugin update kokodudu
+```
+
+## Notes
+
+- If you also keep copies in `~/.claude/skills/`, you will see both `/commit`
+  and `/kokodudu:commit`. Delete the copies in `~/.claude/skills/` once the
+  plugin is installed.
+- A private GitHub repo is cloned with your own git credentials (SSH by
+  default). `ssh -T git@github.com` must work and the key must be in
+  `ssh-agent`.
