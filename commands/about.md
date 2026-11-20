@@ -15,6 +15,7 @@ its plan first and waits for an explicit yes.
 | `/kokodudu:commit [TASK-ID]` | Splits changes by topic, writes conventional commits `type(TASK-ID): subject` (subject max 72 chars, no co-author trailer), commits after approval. |
 | `/kokodudu:pr [draft]` | Pushes the branch and opens a PR with the repository's own PR template, after approval. |
 | `/kokodudu:polish-code [path or whole-file]` | Fixes style violations in changed code using the repo's style doc, formatter config or the bundled C# and Unity guide. Does not commit. |
+| `/kokodudu:init` | Sets up GitNexus in the current repo: first index plus a post-commit hook that refreshes it. Needs approval. |
 | `/kokodudu:about` | This summary. |
 
 ## Typical flow
