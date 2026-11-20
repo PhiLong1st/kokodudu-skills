@@ -3,9 +3,9 @@
   "name": "kokodudu",
   "displayName": "kokodudu skills",
   "version": "1.1.0",
-  "description": "Generic, approval-gated skills for everyday work: commit, pr, and polish-code.",
+  "description": "Skills and setup for Unity projects: commit, pr, polish-code, unity (MCP for Unity), init.",
   "author": {
     "name": "kokodudu"
   },
-  "keywords": ["git", "commit", "pull-request", "code-style", "skills"]
+  "keywords": ["unity", "mcp", "git", "commit", "pull-request", "code-style", "skills"]
 }

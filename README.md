@@ -1,18 +1,19 @@
 # kokodudu skills
 
-A Claude Code plugin that is also its own marketplace. It ships three generic
-skills and two commands. Each one shows its plan and waits for your approval before it changes
-anything.
+A Claude Code plugin that is also its own marketplace, built for Unity
+projects. It ships four skills and two commands. Everything that changes files,
+git history or your config shows its plan and waits for your approval first.
 
 | Skill | Command | What it does |
 |---|---|---|
 | `commit` | `/kokodudu:commit` | Splits changes by topic and writes conventional commits (`type(TASK-ID): subject`, subject max 72 chars, no co-author trailer). |
 | `pr` | `/kokodudu:pr` | Pushes the branch and opens a PR using the repository's own PR template. |
 | `polish-code` | `/kokodudu:polish-code` | Fixes style violations in the changed code. Ships a bundled C# and Unity style guide. |
+| `unity` | `/kokodudu:unity` | Guide for driving the Unity Editor through [MCP for Unity](https://github.com/CoplayDev/unity-mcp): scenes, scripts, tests, console, screenshots. Claude can also load it on its own. |
 | `init` (command) | `/kokodudu:init` | Sets up GitNexus, CodeGraph and MCP for Unity (this repo) and registers CodeGraph and Caveman with your Claude Code config. Asks for approval first, and separately for the one tracked-file edit. |
 | `about` (command) | `/kokodudu:about` | Read-only summary of the plugin and its commands. Lives in `commands/`, not `skills/`. |
 
-All three follow the Agent Skills specification: https://agentskills.io/home
+The four skills follow the Agent Skills specification: https://agentskills.io/home
 
 ## Layout
 
@@ -30,6 +31,7 @@ kokodudu-skills/
 └── skills/
     ├── commit/SKILL.md
     ├── pr/SKILL.md
+    ├── unity/SKILL.md
     └── polish-code/
         ├── SKILL.md
         └── references/csharp-unity.md
