@@ -9,7 +9,7 @@ anything.
 | `commit` | `/kokodudu:commit` | Splits changes by topic and writes conventional commits (`type(TASK-ID): subject`, subject max 72 chars, no co-author trailer). |
 | `pr` | `/kokodudu:pr` | Pushes the branch and opens a PR using the repository's own PR template. |
 | `polish-code` | `/kokodudu:polish-code` | Fixes style violations in the changed code. Ships a bundled C# and Unity style guide. |
-| `init` (command) | `/kokodudu:init` | Sets up GitNexus in the current repo: first index plus a local post-commit hook that refreshes it. Asks for approval first. |
+| `init` (command) | `/kokodudu:init` | Builds the first GitNexus index in the current repo. Asks for approval first. |
 | `about` (command) | `/kokodudu:about` | Read-only summary of the plugin and its commands. Lives in `commands/`, not `skills/`. |
 
 All three follow the Agent Skills specification: https://agentskills.io/home
@@ -24,6 +24,9 @@ kokodudu-skills/
 ├── commands/
 │   ├── about.md
 │   └── init.md
+├── hooks/
+│   ├── hooks.json          # PostToolUse hook on Bash
+│   └── gitnexus-refresh.sh # refreshes GitNexus after `git commit`
 └── skills/
     ├── commit/SKILL.md
     ├── pr/SKILL.md
@@ -65,6 +68,15 @@ Updates land only when it changes, so bump it on every release.
 /plugin marketplace update kokodudu
 /plugin update kokodudu
 ```
+
+## Hook
+
+`hooks/hooks.json` registers a `PostToolUse` hook on `Bash`. After Claude runs
+`git commit`, it refreshes the GitNexus index in the background
+(`gitnexus analyze --skip-agents-md`). It does nothing unless the repo already
+has a `.gitnexus/` folder, so run `/kokodudu:init` once per repo first. It only
+sees commits Claude makes, not commits from a terminal or IDE. Log:
+`.gitnexus/post-commit.log`.
 
 ## Notes
 

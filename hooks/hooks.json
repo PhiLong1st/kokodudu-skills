@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/gitnexus-refresh.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
