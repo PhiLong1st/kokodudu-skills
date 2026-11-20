@@ -69,6 +69,14 @@ Updates land only when it changes, so bump it on every release.
 /plugin update kokodudu
 ```
 
+## Third-party plugins
+
+The marketplace also lists `gitnexus`, referenced from its upstream repo
+(`abhigyanpatwari/GitNexus`, path `gitnexus-claude-plugin`). Nothing is copied
+here, so it follows upstream. Install it with
+`/plugin install gitnexus@kokodudu`. CodeGraph, Caveman and MCP for Unity are
+not Claude plugins; `/kokodudu:init` sets them up instead.
+
 ## Hook
 
 `hooks/hooks.json` registers a `PostToolUse` hook on `Bash`. After Claude runs

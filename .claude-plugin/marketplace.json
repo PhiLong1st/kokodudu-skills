@@ -9,6 +9,15 @@
       "name": "kokodudu",
       "source": "./",
       "description": "Generic, approval-gated skills for everyday work: commit, pr, and polish-code."
+    },
+    {
+      "name": "gitnexus",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/abhigyanpatwari/GitNexus.git",
+        "path": "gitnexus-claude-plugin"
+      },
+      "description": "GitNexus code intelligence: execution flows, blast radius and augmented search. Third-party, referenced from its upstream repo."
     }
   ]
 }
