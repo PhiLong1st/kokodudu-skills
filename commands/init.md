@@ -1,58 +1,101 @@
 ---
-description: Set up GitNexus in the current repo - build the first index so the plugin's post-commit hook can keep it fresh
-allowed-tools: Read Bash(git rev-parse *) Bash(git check-ignore *) Bash(command -v *) Bash(gitnexus *) Bash(ls *) Bash(cat *)
+description: Set up GitNexus, CodeGraph, Caveman and MCP for Unity for the current repo and Claude Code
+allowed-tools: Read Edit Bash(gh release list *) Bash(git rev-parse *) Bash(git check-ignore *) Bash(command -v *) Bash(gitnexus *) Bash(codegraph *) Bash(caveman *) Bash(ls *) Bash(cat *) Bash(grep *)
 disable-model-invocation: true
 ---
 
 # init
 
-Set up GitNexus in the current repository. Flow: inspect read-only, show the
-plan, wait for an explicit yes, act, verify, report. Make no change before the
-yes.
+Set up three code-intelligence tools. Flow: inspect read-only, show the plan,
+wait for an explicit yes, act, verify, report. Make no change before the yes.
 
-The plugin ships a Claude Code hook (`hooks/hooks.json`) that refreshes the
-index after every `git commit` Claude runs, but only in repos that already
-have a `.gitnexus/` folder. This command creates that folder.
+| Tool | Scope | What init does |
+|---|---|---|
+| GitNexus | this repo | First index (`.gitnexus/`). The plugin's hook then refreshes it after every `git commit` Claude makes. |
+| CodeGraph | this repo | `codegraph init`: creates `.codegraph/` and builds the index. |
+| Caveman | your Claude Code setup, all repos | Installs the output-compression hook and the recovery MCP server for Claude. |
+| MCP for Unity ([CoplayDev/unity-mcp](https://github.com/CoplayDev/unity-mcp)) | this repo, Unity projects only | Adds the `com.coplaydev.unity-mcp` package to `Packages/manifest.json`, pinned to a release tag. |
+
+A tool that is not installed is skipped with a note. Never install a tool for
+the user: tell them how (for example `npm i -g gitnexus`) and move on.
+
+MCP for Unity is the one item that edits a tracked file
+(`Packages/manifest.json`), so it never runs on a general yes: it needs its own
+explicit yes, named as such.
 
 ## 1. Inspect (read-only)
 
-- Repo root: `git rev-parse --show-toplevel`. Not a git repo: stop and say so.
-- `command -v gitnexus`. Missing: stop and tell the user to install it
-  themselves (`npm i -g gitnexus`). Do not install it.
-- Does `<root>/.gitnexus/` already exist (already indexed)?
-- Is `.gitnexus` ignored: `git check-ignore -q .gitnexus`.
+- Repo root: `git rev-parse --show-toplevel`. Not a git repo: do only the
+  Caveman part, skip the two repo tools, and say so.
+- For each of `gitnexus`, `codegraph`, `caveman`: `command -v <tool>`.
+- Repo tools: does `<root>/.gitnexus/` exist? does `<root>/.codegraph/` exist?
+  Is each ignored (`git check-ignore -q .gitnexus`, `git check-ignore -q
+  .codegraph`)?
+- Caveman: is it already set up for Claude? Look for a caveman hook in
+  `~/.claude/settings.json` and a `caveman` server in the Claude MCP config
+  (`grep -l caveman` on those files). Already present: mark it done, skip it.
+- MCP for Unity: is this a Unity project (`ProjectSettings/ProjectVersion.txt`
+  exists)? Not Unity: skip. Does `Packages/manifest.json` already list
+  `com.coplaydev.unity-mcp`? Then skip. Does it list a different Unity MCP
+  package, or does the Claude MCP config already have a `unity-mcp` server? Then
+  do not add this one: a second server under the same name would clash. Show
+  what was found and ask. Is `uv` on PATH (`command -v uv`)? The server needs
+  it: if missing, say so and tell the user to install it themselves.
 
 ## 2. Show the plan and ask
 
-Show exactly what will happen, then ask "OK to proceed?". Only a clear yes
-counts. The plan lists:
+Show exactly what will run, then ask "OK to proceed?". Only a clear yes counts.
+List each item with its scope, and mark the skipped ones and why:
 
-1. Run `gitnexus analyze --skip-agents-md` to build the first index (offer it
-   as a refresh if `.gitnexus/` already exists). `--skip-agents-md` keeps it
-   from rewriting `CLAUDE.md` and `AGENTS.md`.
-2. If `.gitnexus` is not ignored: say it will show up as untracked and ask
-   whether to add `.gitnexus/` to `.git/info/exclude` (local, never
-   committed). Do this only on a separate yes.
+1. GitNexus: `gitnexus analyze --skip-agents-md`. The flag keeps it from
+   rewriting `CLAUDE.md` and `AGENTS.md`. If `.gitnexus/` already exists, offer
+   it as a refresh.
+2. CodeGraph: `codegraph init -y` (non-interactive, takes the defaults). If
+   `.codegraph/` exists already, skip.
+3. Caveman: `caveman hooks install claude` and `caveman mcp install claude`.
+   Say plainly that these change the user's global Claude Code config, not only
+   this repo, and that `caveman hooks uninstall claude` and
+   `caveman mcp uninstall claude` undo them.
+4. MCP for Unity: add one line to the `dependencies` of
+   `Packages/manifest.json` (show the exact line and the git diff it will
+   produce): `"com.coplaydev.unity-mcp":
+   "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#<tag>"`. Take
+   `<tag>` from the latest release (`gh release list -R CoplayDev/unity-mcp
+   --limit 1`), never `main`. Ask for this item as its own yes. It leaves
+   `Packages/manifest.json` and `Packages/packages-lock.json` modified and
+   uncommitted: say so. Unity must be reopened or refocused to resolve it, and
+   the user then runs `Window > MCP for Unity > Configure All Detected Clients`
+   inside Unity: tell them, do not try to do it.
+5. For `.gitnexus` and `.codegraph` that are not ignored: they will show as
+   untracked. Ask on its own whether to add them to `.git/info/exclude` (local,
+   never committed).
 
-State plainly that nothing tracked is changed and nothing is committed.
+State that nothing is committed, and that the only tracked file changed is
+`Packages/manifest.json`, and only if MCP for Unity was approved. The user may
+approve only some items: do exactly those.
 
 ## 3. Act
 
-Only after the yes:
+Only after the yes, run the approved items in the order above. The two indexers
+can take a while on a big repo: run them in the background and do not wait on
+them unless the user asked. Append to `.git/info/exclude` only if approved.
 
-1. Run `gitnexus analyze --skip-agents-md`. It can take a while on a big repo:
-   run it in the background and do not wait on it unless the user asked.
-2. Append `.gitnexus/` to `.git/info/exclude` only if the user said yes to it.
-
-Never commit, push, or touch any tracked file.
+Never commit or push. Never touch a tracked file other than the one approved
+line in `Packages/manifest.json`.
 
 ## 4. Verify
 
-`gitnexus status` runs. If it errors, show the error as is and do not claim
-the setup works.
+Run `gitnexus status`, `codegraph status` and `caveman status`, for the tools
+that were set up. If one errors, show the error as is and do not claim that
+tool works. A background index still running is "in progress", not a failure.
+For MCP for Unity, re-read `Packages/manifest.json` and confirm the line is
+there; whether Unity resolved the package cannot be checked from here.
 
 ## 5. Report
 
-Say what was done, whether the first index finished or is still running, and
-anything that failed or could not be verified. Remind the user that the hook
-only fires for commits Claude makes, not for commits made in a terminal or IDE.
+One short list: per tool, done, skipped (and why) or failed. Remind the user
+that:
+
+- the GitNexus hook only fires for commits Claude makes, not for commits made
+  in a terminal or IDE;
+- Caveman may need a new Claude Code session to take effect.

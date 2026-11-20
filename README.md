@@ -9,7 +9,7 @@ anything.
 | `commit` | `/kokodudu:commit` | Splits changes by topic and writes conventional commits (`type(TASK-ID): subject`, subject max 72 chars, no co-author trailer). |
 | `pr` | `/kokodudu:pr` | Pushes the branch and opens a PR using the repository's own PR template. |
 | `polish-code` | `/kokodudu:polish-code` | Fixes style violations in the changed code. Ships a bundled C# and Unity style guide. |
-| `init` (command) | `/kokodudu:init` | Builds the first GitNexus index in the current repo. Asks for approval first. |
+| `init` (command) | `/kokodudu:init` | Sets up GitNexus, CodeGraph and MCP for Unity (this repo) and Caveman (your Claude Code config). Asks for approval first, and separately for the one tracked-file edit. |
 | `about` (command) | `/kokodudu:about` | Read-only summary of the plugin and its commands. Lives in `commands/`, not `skills/`. |
 
 All three follow the Agent Skills specification: https://agentskills.io/home
