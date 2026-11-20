@@ -1,6 +1,6 @@
 ---
 description: Set up GitNexus, CodeGraph, Caveman and MCP for Unity for the current repo and Claude Code
-allowed-tools: Read Edit Bash(gh release list *) Bash(git rev-parse *) Bash(git check-ignore *) Bash(command -v *) Bash(gitnexus *) Bash(codegraph *) Bash(caveman *) Bash(ls *) Bash(cat *) Bash(grep *)
+allowed-tools: Read Edit Bash(gh release list *) Bash(gh auth status*) Bash(git config --get *) Bash(git remote get-url *) Bash(git rev-parse *) Bash(git check-ignore *) Bash(command -v *) Bash(gitnexus *) Bash(codegraph *) Bash(caveman *) Bash(ls *) Bash(cat *) Bash(grep *)
 disable-model-invocation: true
 ---
 
@@ -14,6 +14,7 @@ wait for an explicit yes, act, verify, report. Make no change before the yes.
 | GitNexus | this repo | First index (`.gitnexus/`). The plugin's hook then refreshes it after every `git commit` Claude makes. |
 | CodeGraph | this repo + your Claude Code config | Registers the CodeGraph MCP server for Claude (global), then `codegraph init` creates `.codegraph/` and builds the index. The plugin's hook then runs `codegraph sync` after every `git commit` Claude makes. |
 | Caveman | your Claude Code setup, all repos | Installs the output-compression hook and the recovery MCP server for Claude. |
+| GitHub CLI (`gh`) and git identity | your machine | Checks that `gh` is installed and signed in and that git knows your name and email, which `/kokodudu:pr` and `/kokodudu:commit` need. Check only: you do the install and sign-in. |
 | MCP for Unity ([CoplayDev/unity-mcp](https://github.com/CoplayDev/unity-mcp)) | this repo, Unity projects only | Adds the `com.coplaydev.unity-mcp` package to `Packages/manifest.json`, pinned to a release tag. |
 
 A tool that is not installed is skipped with a note. Never install a tool for
@@ -28,6 +29,10 @@ explicit yes, named as such.
 - Repo root: `git rev-parse --show-toplevel`. Not a git repo: do only the
   Caveman part, skip the two repo tools, and say so.
 - For each of `gitnexus`, `codegraph`, `caveman`: `command -v <tool>`.
+- GitHub CLI: `command -v gh`; if present, `gh auth status` (signed in? which
+  account, which scopes; `/kokodudu:pr` needs the `repo` scope). Git identity:
+  `git config --get user.name` and `git config --get user.email`. Is there an
+  `origin` remote that points at GitHub (`git remote get-url origin`)?
 - Repo tools: does `<root>/.gitnexus/` exist? does `<root>/.codegraph/` exist?
   Is each ignored (`git check-ignore -q .gitnexus`, `git check-ignore -q
   .codegraph`)?
@@ -78,7 +83,13 @@ List each item with its scope, and mark the skipped ones and why:
    uncommitted: say so. Unity must be reopened or refocused to resolve it, and
    the user then runs `Window > MCP for Unity > Configure All Detected Clients`
    inside Unity: tell them, do not try to do it.
-5. For `.gitnexus` and `.codegraph` that are not ignored: they will show as
+5. GitHub CLI and git identity: report what was found and what is missing,
+   with the exact command for the user to run themselves, never run it for
+   them: `brew install gh` (or the platform's install), `gh auth login`,
+   `git config --global user.name "..."`, `git config --global user.email
+   "..."`. Signing in is interactive and handles credentials, so it is always
+   the user's step. This item changes nothing, so it needs no approval.
+6. For `.gitnexus` and `.codegraph` that are not ignored: they will show as
    untracked. Ask on its own whether to add them to `.git/info/exclude` (local,
    never committed).
 
@@ -100,6 +111,8 @@ line in `Packages/manifest.json`.
 Run `gitnexus status`, `codegraph status` and `caveman status`, for the tools
 that were set up. If one errors, show the error as is and do not claim that
 tool works. A background index still running is "in progress", not a failure.
+For GitHub CLI, the check in step 1 is the verification: report signed in or
+not, scopes, and git identity set or not.
 For MCP for Unity, re-read `Packages/manifest.json` and confirm the line is
 there; whether Unity resolved the package cannot be checked from here.
 
