@@ -1,10 +1,9 @@
 ---
 name: polish-code
-description: Polish code against a coding style guide. Finds violations in the changed files, proposes the exact edits, and applies only what the user approves; risky changes are listed for a decision, never applied silently. Includes a bundled C# and Unity style guide. Use when the user types /polish-code. Follows the Agent Skills specification, see https://agentskills.io/home
+description: Polish code against a coding style guide. Finds violations in the changed files, proposes the exact edits, and applies only what the user approves; risky changes are listed for a decision, never applied silently. Includes a bundled C# and Unity style guide. Use when the user types /polish-code, asks to polish or clean up code style, or a workflow reaches its polish step. Follows the Agent Skills specification, see https://agentskills.io/home
 compatibility: Designed for Claude Code. Requires git. Verification uses the project's own build, lint, or test command if one exists.
 metadata:
   version: "1.0"
-disable-model-invocation: true
 allowed-tools: Read Grep Glob Bash(git status *) Bash(git diff *) Bash(git log *) Bash(git ls-files *)
 ---
 

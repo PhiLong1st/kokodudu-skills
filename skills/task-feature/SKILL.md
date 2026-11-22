@@ -58,6 +58,11 @@ questions into one round to cut waiting.
    only write to Notion is the spec update in Gate 3, after the user's
    Confirm. Never touch status, comments or properties
 8. Never invent requirements, ACs or a task ID. Missing means ask
+9. Follow the project's own flow: `CLAUDE.md`, `AGENTS.md` and the kokodudu
+   block in `CLAUDE.md` (base branch, compile and test commands, impact
+   analysis rules, code rules). Use the `unity` skill for Editor work, and
+   `kokodudu:polish-code` then `kokodudu:commit` for style and commits. A
+   project rule can add steps; it never relaxes the invariant rules above
 
 ---
 
@@ -99,7 +104,10 @@ questions into one round to cut waiting.
    fill it. Do not make up content
 3. **Stop** (report, change nothing) if the task is not code work in this repo
    (design only, research, another project)
-4. Read the codebase (read-only; prefer CodeGraph or GitNexus when indexed,
+4. Read the project's own flow first: `CLAUDE.md`, `AGENTS.md`, and the
+   kokodudu block in `CLAUDE.md` if present (base branch, compile and test
+   commands, rules for agents). Then read the codebase (read-only; prefer
+   CodeGraph or GitNexus when indexed,
    else Grep and Read) to estimate the size and propose it, with reasons
    (files and systems affected, risk):
 
@@ -163,7 +171,11 @@ Enter plan mode and write the plan, with detail matching the size:
      truly independent (no shared files, no dependency on each other)
    - In Unity, parallel is allowed only for pure C# logic that does not touch
      scenes, prefabs, ScriptableObjects, `.meta` files or ProjectSettings.
-     Otherwise run sequentially
+     Otherwise run sequentially. Parallel agents work in their own worktrees
+     without an Editor and verify with the project's editor-less compile
+     check; tests run in one Editor after the merge. Follow the "Parallel
+     agents and worktrees" section of the kokodudu block in `CLAUDE.md` when
+     the project has it
 3. **Commits**: each unit is split into small steps, each independently
    committable
 4. **Test plan per phase**: test cases mapped to ACs (TC-<phase>.<n> -> ACx),
@@ -210,12 +222,14 @@ Execution.
     their own worktree (`isolation: "worktree"`)
 
   Brief each agent fully: spec, the unit's plan, files it may edit, files it
-  must not touch, commit rules, invariant rule 3. When done it reports back:
+  must not touch, commit rules, invariant rule 3, and the project rules it must
+  follow (invariant rule 9). When done it reports back:
   the commits, the files changed, how it checked its work
 
 **B. Orchestrator integrates**: review the diff against the plan and the
 conventions (send back to dev to fix if needed), merge worktrees into the
-feature branch, resolve conflicts, make sure it builds and compiles
+feature branch, resolve conflicts, run `kokodudu:polish-code` on the changed
+files (its fixes are their own commit), make sure it builds and compiles
 
 **C. QA verifies**: run this phase's tests + every earlier phase's tests + the
 existing suite. Use the project's own build and test commands (README, a

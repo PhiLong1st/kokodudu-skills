@@ -1,7 +1,7 @@
 # kokodudu skills
 
 A Claude Code plugin that is also its own marketplace, built for Unity
-projects. It ships five skills and two commands. Everything that changes files,
+projects. It ships five skills and three commands. Everything that changes files,
 git history or your config shows its plan and waits for your approval first.
 
 | Skill | Command | What it does |
@@ -11,6 +11,7 @@ git history or your config shows its plan and waits for your approval first.
 | `pr` | `/kokodudu:pr` | Pushes the branch and opens a PR using the repository's own PR template. |
 | `polish-code` | `/kokodudu:polish-code` | Fixes style violations in the changed code. Ships a bundled C# and Unity style guide. |
 | `unity` | `/kokodudu:unity` | Guide for driving the Unity Editor through [MCP for Unity](https://github.com/CoplayDev/unity-mcp): scenes, scripts, tests, console, screenshots. Claude can also load it on its own. |
+| `unity-setup` (command) | `/kokodudu:unity-setup` | Prepares a Unity project: runs Claude's `/init` if there is no `CLAUDE.md`, adds the pinned Unity and OpenUPM packages, the UniTask and UniRx code rules, an `.editorconfig`, and a kokodudu workflow block in `CLAUDE.md` so the agent uses these skills along the project's own flow. Asks for approval, and separately for `manifest.json`. |
 | `init` (command) | `/kokodudu:init` | Sets up GitNexus, CodeGraph and MCP for Unity (this repo), registers CodeGraph and Caveman with your Claude Code config, and checks that the GitHub CLI and git identity needed by `pr` and `commit` are ready. Asks for approval first, and separately for the one tracked-file edit. |
 | `about` (command) | `/kokodudu:about` | Read-only summary of the plugin and its commands. Lives in `commands/`, not `skills/`. |
 
@@ -25,6 +26,7 @@ kokodudu-skills/
 │   └── marketplace.json    # marketplace name, plugin list
 ├── commands/
 │   ├── about.md
+│   ├── unity-setup.md
 │   └── init.md
 ├── hooks/
 │   ├── hooks.json          # PostToolUse hook on Bash
@@ -32,6 +34,8 @@ kokodudu-skills/
 ├── references/             # shared files, read by skills via ${CLAUDE_PLUGIN_ROOT}
 │   ├── pr.txt              # fallback PR body template
 │   ├── csharp-unity.md     # bundled C# and Unity style guide
+│   ├── unity-code-rules.md # UniTask and UniRx rules for unity-setup
+│   ├── unity-workflow.md   # kokodudu workflow block for unity-setup
 │   └── .editorconfig
 └── skills/
     ├── task-feature/SKILL.md

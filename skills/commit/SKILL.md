@@ -1,10 +1,9 @@
 ---
 name: commit
-description: Create git commits for the current changes using conventional-commit rules (scope = task ID, one commit one topic, subject max 72 chars, no co-author trailer). Always shows the plan and waits for the user's approval before staging or committing. Use when the user types /commit. Follows the Agent Skills specification, see https://agentskills.io/home
+description: Create git commits for the current changes using conventional-commit rules (scope = task ID, one commit one topic, subject max 72 chars, no co-author trailer). Always shows the plan and waits for the user's explicit Confirm before staging or committing. Use when the user types /commit, asks to commit, or a workflow such as task-feature reaches a commit step. Follows the Agent Skills specification, see https://agentskills.io/home
 compatibility: Designed for Claude Code. Requires git.
 metadata:
   version: "1.0"
-disable-model-invocation: true
 allowed-tools: Bash(git status *) Bash(git diff *) Bash(git log *) Bash(git branch *) Bash(git add *) Bash(git commit *)
 ---
 

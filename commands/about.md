@@ -17,11 +17,13 @@ its plan first and waits for an explicit yes.
 | `/kokodudu:pr [draft]` | Pushes the branch and opens a PR with the repository's own PR template, after approval. |
 | `/kokodudu:polish-code [path or whole-file]` | Fixes style violations in changed code using the repo's style doc, formatter config or the bundled C# and Unity guide. Does not commit. |
 | `/kokodudu:unity` | Guide for driving the Unity Editor through MCP for Unity: scenes, scripts, tests, console, screenshots. |
+| `/kokodudu:unity-setup` | Prepares a Unity project: `CLAUDE.md`, pinned Unity and OpenUPM packages, UniTask and UniRx code rules, `.editorconfig`, and a kokodudu workflow block so the agent uses these skills along the project's flow. Needs approval; `manifest.json` has its own yes. |
 | `/kokodudu:init` | Sets up GitNexus, CodeGraph, Caveman and MCP for Unity, and checks the GitHub CLI and git identity that pr and commit need. GitNexus and CodeGraph are then refreshed by the plugin's hook after every commit Claude makes. Needs approval. |
 | `/kokodudu:about` | This summary. |
 
 ## Typical flow
 
+0. `/kokodudu:unity-setup` once per Unity project.
 1. `/kokodudu:task-feature <task-id or notion-url>` to build the feature (it commits as it goes).
 2. `/kokodudu:polish-code` to clean the changed code.
 3. `/kokodudu:commit` for any leftover changes.
