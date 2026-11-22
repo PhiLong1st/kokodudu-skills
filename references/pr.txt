@@ -1,0 +1,28 @@
+# Description
+
+_Replace this text with a summary of the changes and the related issue. Please also include relevant motivation and context._
+
+* Feature: <task ID and PR title text>
+
+## Type of change
+
+- [ ] Bug fix (non-breaking change which fixes an issue)
+- [ ] New feature (non-breaking change which adds functionality)
+- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- [ ] Performance optimization
+- [ ] Refactoring (no functional changes)
+- [ ] This change requires a documentation update
+
+## Code Quality
+- [ ] Follows C# style guide (Pascal case, meaningful names)
+- [ ] Uses UniTask for async (no System.Threading)
+- [ ] Avoids forbidden namespaces (System.Linq, System.Reflection)
+- [ ] Proper SerializeField usage and component design
+- [ ] No hardcoded values (uses ScriptableObjects/constants)
+
+## Review Checklist
+- [ ] Self-reviewed for Unity best practices
+- [ ] Unit tests added/updated/tested with >90% coverage
+- [ ] XML documentation for public methods
+- [ ] Tooltips for serialized fields (if needed)
+- [ ] Breaking changes documented (if applicable)

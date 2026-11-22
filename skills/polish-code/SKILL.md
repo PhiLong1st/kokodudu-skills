@@ -11,7 +11,8 @@ allowed-tools: Read Grep Glob Bash(git status *) Bash(git diff *) Bash(git log *
 # Polish code
 
 Bring code in line with a style guide without changing what it does.
-Self-contained: do not depend on any other project file for these rules.
+The only plugin file it reads is the bundled style guide
+`${CLAUDE_PLUGIN_ROOT}/references/csharp-unity.md`.
 
 Arguments (optional): file or directory paths to polish, `branch` or `staged`
 to pick the scope, `whole-file` to check untouched lines too, and/or the path
@@ -34,8 +35,8 @@ Use the first that exists, and say which one you used:
 2. A style guide in the repo: `CODING-STYLE*`, `STYLE*`, or a style section of
    `CONTRIBUTING*`, at the repo root or in `docs/`
 3. The repo's formatter or linter config (for example `.editorconfig`)
-4. The bundled guide `references/csharp-unity.md`, when the files in scope
-   are C#
+4. The bundled guide `${CLAUDE_PLUGIN_ROOT}/references/csharp-unity.md`, when
+   the files in scope are C#
 5. Nothing found: **ask the user** which style to apply. Never invent rules
 
 Read the whole style source before checking any code. Its rules are tagged
