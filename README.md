@@ -1,11 +1,12 @@
 # kokodudu skills
 
 A Claude Code plugin that is also its own marketplace, built for Unity
-projects. It ships four skills and two commands. Everything that changes files,
+projects. It ships five skills and two commands. Everything that changes files,
 git history or your config shows its plan and waits for your approval first.
 
 | Skill | Command | What it does |
 |---|---|---|
+| `task-feature` | `/kokodudu:task-feature <task-id or notion-url>` | Orchestrates a feature end to end: confirmed gates for branch, spec, review, Notion update, plan and decisions, then phased execution with dev and QA agents, one commit per step. Does not push or open a PR unless asked. |
 | `commit` | `/kokodudu:commit` | Splits changes by topic and writes conventional commits (`type(TASK-ID): subject`, subject max 72 chars, no co-author trailer). |
 | `pr` | `/kokodudu:pr` | Pushes the branch and opens a PR using the repository's own PR template. |
 | `polish-code` | `/kokodudu:polish-code` | Fixes style violations in the changed code. Ships a bundled C# and Unity style guide. |
@@ -13,7 +14,7 @@ git history or your config shows its plan and waits for your approval first.
 | `init` (command) | `/kokodudu:init` | Sets up GitNexus, CodeGraph and MCP for Unity (this repo), registers CodeGraph and Caveman with your Claude Code config, and checks that the GitHub CLI and git identity needed by `pr` and `commit` are ready. Asks for approval first, and separately for the one tracked-file edit. |
 | `about` (command) | `/kokodudu:about` | Read-only summary of the plugin and its commands. Lives in `commands/`, not `skills/`. |
 
-The four skills follow the Agent Skills specification: https://agentskills.io/home
+The five skills follow the Agent Skills specification: https://agentskills.io/home
 
 ## Layout
 
@@ -28,13 +29,16 @@ kokodudu-skills/
 ├── hooks/
 │   ├── hooks.json          # PostToolUse hook on Bash
 │   └── refresh-index.sh    # refreshes GitNexus and CodeGraph after `git commit`
+├── references/             # shared files, read by skills via ${CLAUDE_PLUGIN_ROOT}
+│   ├── pr.txt              # fallback PR body template
+│   ├── csharp-unity.md     # bundled C# and Unity style guide
+│   └── .editorconfig
 └── skills/
+    ├── task-feature/SKILL.md
     ├── commit/SKILL.md
     ├── pr/SKILL.md
     ├── unity/SKILL.md
-    └── polish-code/
-        ├── SKILL.md
-        └── references/csharp-unity.md
+    └── polish-code/SKILL.md
 ```
 
 ## Install
