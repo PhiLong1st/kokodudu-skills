@@ -17,6 +17,30 @@ Arguments (optional): a task ID and/or a hint about what to include.
 
 Reference: Agent Skills specification, https://agentskills.io/home
 
+## Hard rules
+
+- **No commit before the user approves the content.** The content is each
+  exact message and the exact files it includes, shown in full in chat first
+- Approval is a clear **Confirm** from the user, given AFTER that content was
+  shown. Ask with AskUserQuestion: **Confirm** / **Edit** / **Cancel**. Silence,
+  "ok" said earlier, a `/commit` call, or approval of an earlier plan does not
+  count. Any change after approval voids it: show it again and ask again
+- This skill never pushes. Pushing and opening a PR belong to `/pr`, which has
+  its own approval of the title, body and commits
+- These rules hold when the skill is called from another skill or workflow, so
+  no caller can approve on the user's behalf. **One narrow exception:** inside
+  `task-feature`, after the user has confirmed its Decision Sheet (Gate 5), the
+  commits of the confirmed plan need no per-commit approval. The user approved
+  them there. A commit qualifies only if ALL hold:
+  - it is a step of the confirmed plan, and its files belong to that unit
+  - the message follows the format below
+  - it includes nothing from the "Ask first" or "Block and warn" lists
+    (step 3)
+
+  Still show the message and files in chat before committing, as a notice
+  without waiting. Anything that does not qualify goes through the normal
+  approval. The exception never covers `git push`
+
 ## Message format
 
 ```
@@ -86,12 +110,13 @@ Why: faster review, clean revert, useful blame and bisect, traceable history.
    - per commit: the exact message, and the exact files it will include
      (with companion files)
    - files left out, and why
-   - end with a question, e.g. "OK to commit?"
+   - then ask with AskUserQuestion (see Hard rules): **Confirm** to commit /
+     **Edit** / **Cancel**
 
-   Only a clear yes from the user counts. If the user asks for changes,
-   revise the plan and show it again. If the user declines or is silent,
-   change nothing. Approval covers only the plan shown: if anything changes
-   (another file, a different message), ask again
+   Only a Confirm counts. On **Edit**, revise the plan and show it again. On
+   **Cancel**, or if the user is silent, change nothing. Approval covers only
+   the plan shown: if anything changes (another file, a different message),
+   ask again
 8. **Stage by explicit path**: `git add <file> <file>`.
    Never `git add -A` or `git add .`
 9. **Commit** with a HEREDOC. Respect the signing config: never pass

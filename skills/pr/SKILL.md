@@ -5,17 +5,31 @@ compatibility: Designed for Claude Code. Requires git and the GitHub CLI (gh), a
 metadata:
   version: "1.0"
 disable-model-invocation: true
-allowed-tools: Bash(git status *) Bash(git log *) Bash(git diff *) Bash(git branch *) Bash(git push *) Bash(gh pr create *) Bash(gh pr view *) Bash(gh pr list *) Bash(gh repo view *)
+allowed-tools: Bash(git status *) Bash(git log *) Bash(git diff *) Bash(git branch *) Bash(gh pr view *) Bash(gh pr list *) Bash(gh repo view *)
 ---
 
 # Pull request
 
-Push the current branch and open one PR for it. Self-contained: do not depend
-on any other project file for these rules.
+Push the current branch and open one PR for it. The only plugin file it reads
+is the fallback template `${CLAUDE_PLUGIN_ROOT}/references/pr.txt`.
 
 Arguments (optional): a task ID, a base branch, and/or the word `draft`.
 
 Reference: Agent Skills specification, https://agentskills.io/home
+
+## Hard rules
+
+- **No push and no PR before the user approves the content.** The content is
+  the title, base <- head, draft or not, the complete body, and the commits to
+  be pushed. It must be shown in full in chat first, then approved
+- Approval is a clear **Confirm** from the user, given AFTER that content was
+  shown. Ask with AskUserQuestion: **Confirm** / **Edit** / **Cancel**. Silence,
+  "ok" said earlier, a `/pr` call, or approval of an earlier version does not
+  count
+- Any change after approval (a body edit, another commit, a different base)
+  voids it. Show the new content and ask again
+- These rules hold when the skill is called from another skill or workflow.
+  No caller can approve on the user's behalf
 
 ## Conventions
 
@@ -35,7 +49,10 @@ Reference: Agent Skills specification, https://agentskills.io/home
     holds several templates, ask the user which one
   - Keep every heading, checkbox line, and the order exactly as in the
     template. Do not delete, reword, or reorder anything
-  - No template found: use `## Summary`, `## Changes`, `## Testing`
+  - No template found: use the plugin's fallback template,
+    `${CLAUDE_PLUGIN_ROOT}/references/pr.txt` (read it with the Read tool). If
+    the file cannot be read or is empty, use `## Summary`, `## Changes`,
+    `## Testing`. Say in the approval step that the fallback was used
   - **Fill it in:**
     - Replace instruction or placeholder text with 2-4 sentences: what
       changed, why, relevant context. Base it on the diff and commits
@@ -86,12 +103,12 @@ Reference: Agent Skills specification, https://agentskills.io/home
    - the complete PR body exactly as it will be sent
    - the commits that will be pushed (`git log <base>..HEAD --oneline`)
    - the boxes left unticked, and uncommitted files that are left out
-   - end with a question, e.g. "OK to push and open this PR?"
+   - then ask with AskUserQuestion (see Hard rules): **Confirm** to push and
+     open the PR / **Edit** / **Cancel**
 
-   Only a clear yes from the user counts. If the user asks for changes,
-   revise and show the plan again. If the user declines or is silent,
-   change nothing. Approval covers only the plan shown: if anything changes,
-   ask again
+   Only a Confirm counts. On **Edit**, revise and show the plan again. On
+   **Cancel**, or if the user is silent, change nothing. Approval covers only
+   the plan shown: if anything changes, ask again
 8. **Push**: `git push -u origin <branch>` when there is no upstream,
    otherwise `git push`. Never force-push
 9. **Create the PR** with `gh pr create --base <base> --title ... --body ...`
