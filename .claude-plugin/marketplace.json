@@ -8,7 +8,7 @@
     {
       "name": "kokodudu",
       "source": "./",
-      "description": "Skills and setup for Unity projects: commit, pr, polish-code, unity (MCP for Unity), init."
+      "description": "Skills and setup for Unity projects: task-feature, commit, pr, polish-code, unity (Unity CLI and MCP for Unity), plus the init and unity-setup commands."
     },
     {
       "name": "gitnexus",

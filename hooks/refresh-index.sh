@@ -1,14 +1,13 @@
 #!/bin/sh
 # PostToolUse hook (matcher: Bash). After Claude runs `git commit`, refresh the
-# GitNexus and CodeGraph indexes in the background. The hook input JSON arrives
+# GitNexus index in the background. The hook input JSON arrives
 # on stdin.
 #
-# Each tool is a silent no-op unless all of these hold:
+# It is a silent no-op unless all of these hold:
 #   - the Bash command contains "git commit"
 #   - the current directory is inside a git repo
-#   - the repo already has that tool's index folder (.gitnexus/ or .codegraph/,
-#     created by /kokodudu:init)
-#   - the tool's CLI can be found
+#   - the repo already has the .gitnexus/ index folder (created by /kokodudu:init)
+#   - the gitnexus CLI can be found
 #
 # GitNexus runs with --skip-agents-md so it does not rewrite CLAUDE.md or
 # AGENTS.md, which would leave the tree dirty right after the commit.
@@ -33,10 +32,6 @@ find_cli() {
 
 if [ -d "$root/.gitnexus" ] && find_cli gitnexus; then
   nohup gitnexus analyze --skip-agents-md >"$root/.gitnexus/post-commit.log" 2>&1 &
-fi
-
-if [ -d "$root/.codegraph" ] && find_cli codegraph; then
-  nohup codegraph sync "$root" >"$root/.codegraph/post-commit.log" 2>&1 &
 fi
 
 exit 0

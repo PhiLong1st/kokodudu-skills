@@ -108,8 +108,7 @@ questions into one round to cut waiting.
 4. Read the project's own flow first: `CLAUDE.md`, `AGENTS.md`, and the
    kokodudu block in `CLAUDE.md` if present (base branch, compile and test
    commands, rules for agents). Then read the codebase (read-only; prefer
-   CodeGraph or GitNexus when indexed,
-   else Grep and Read) to estimate the size and propose it, with reasons
+   GitNexus when indexed, else Grep and Read) to estimate the size and propose it, with reasons
    (files and systems affected, risk):
 
 | Size | Suggested criteria | Gate 2 (proposal) | Execution |

@@ -1,6 +1,6 @@
 ---
 name: unity
-description: Drive the Unity Editor through MCP for Unity (CoplayDev/unity-mcp) - scenes, GameObjects, C# scripts, assets, tests, console and screenshots. Use when working in a Unity project and the unity-mcp tools or mcpforunity:// resources are available. Follows the Agent Skills specification, see https://agentskills.io/home
+description: Drive the Unity Editor, Unity CLI first when it is installed, then MCP for Unity (CoplayDev/unity-mcp) - compile, tests, console, C# evaluation, scenes, GameObjects, scripts, assets and screenshots. Use when working in a Unity project and either the unity CLI or the unity-mcp tools / mcpforunity:// resources are available. Follows the Agent Skills specification, see https://agentskills.io/home
 compatibility: Designed for Claude Code. Needs a Unity project with either the Unity CLI (preferred when installed) or the MCP for Unity package and a connected server (uv on PATH). MCP for Unity is set up with /kokodudu:init.
 metadata:
   version: "1.0"

@@ -1,18 +1,17 @@
 ---
-description: Set up GitNexus, CodeGraph, Caveman and MCP for Unity for the current repo and Claude Code
-allowed-tools: Read Edit Bash(gh release list *) Bash(gh auth status*) Bash(git config --get *) Bash(git remote get-url *) Bash(git rev-parse *) Bash(git check-ignore *) Bash(command -v *) Bash(gitnexus *) Bash(codegraph *) Bash(caveman *) Bash(ls *) Bash(cat *) Bash(grep *)
+description: Set up GitNexus, Caveman and MCP for Unity for the current repo and Claude Code
+allowed-tools: Read Edit Bash(gh release list *) Bash(gh auth status*) Bash(git config --get *) Bash(git remote get-url *) Bash(git rev-parse *) Bash(git check-ignore *) Bash(command -v *) Bash(gitnexus *) Bash(caveman *) Bash(ls *) Bash(cat *) Bash(grep *)
 disable-model-invocation: true
 ---
 
 # init
 
-Set up three code-intelligence tools. Flow: inspect read-only, show the plan,
+Set up the code-intelligence and Unity tools. Flow: inspect read-only, show the plan,
 wait for an explicit yes, act, verify, report. Make no change before the yes.
 
 | Tool | Scope | What init does |
 |---|---|---|
 | GitNexus | this repo | First index (`.gitnexus/`). The plugin's hook then refreshes it after every `git commit` Claude makes. |
-| CodeGraph | this repo + your Claude Code config | Registers the CodeGraph MCP server for Claude (global), then `codegraph init` creates `.codegraph/` and builds the index. The plugin's hook then runs `codegraph sync` after every `git commit` Claude makes. |
 | Caveman | your Claude Code setup, all repos | Installs the output-compression hook and the recovery MCP server for Claude. |
 | GitHub CLI (`gh`) and git identity | your machine | Checks that `gh` is installed and signed in and that git knows your name and email, which `/kokodudu:pr` and `/kokodudu:commit` need. Check only: you do the install and sign-in. |
 | MCP for Unity ([CoplayDev/unity-mcp](https://github.com/CoplayDev/unity-mcp)) | this repo, Unity projects only | Adds the `com.coplaydev.unity-mcp` package to `Packages/manifest.json`, pinned to a release tag. |
@@ -27,22 +26,14 @@ explicit yes, named as such.
 ## 1. Inspect (read-only)
 
 - Repo root: `git rev-parse --show-toplevel`. Not a git repo: do only the
-  Caveman part, skip the two repo tools, and say so.
-- For each of `gitnexus`, `codegraph`, `caveman`: `command -v <tool>`.
+  Caveman part, skip the repo tools, and say so.
+- For each of `gitnexus`, `caveman`: `command -v <tool>`.
 - GitHub CLI: `command -v gh`; if present, `gh auth status` (signed in? which
   account, which scopes; `/kokodudu:pr` needs the `repo` scope). Git identity:
   `git config --get user.name` and `git config --get user.email`. Is there an
   `origin` remote that points at GitHub (`git remote get-url origin`)?
-- Repo tools: does `<root>/.gitnexus/` exist? does `<root>/.codegraph/` exist?
-  Is each ignored (`git check-ignore -q .gitnexus`, `git check-ignore -q
-  .codegraph`)?
-- CodeGraph MCP: is a `codegraph` server already in the Claude MCP config
-  (`grep -l codegraph` on `~/.claude.json` and `~/.claude/settings.json`)?
-  Already present: skip the registration. Find the agent id for Claude Code with
-  `codegraph install --print-config claude` (it writes nothing). If `claude` is
-  not a valid id, read the valid ids from the error and pick the Claude Code
-  one; never guess, never use `--target auto` or `all`, which would also wire
-  other editors.
+- GitNexus: does `<root>/.gitnexus/` exist? Is it ignored
+  (`git check-ignore -q .gitnexus`)?
 - Caveman: is it already set up for Claude? Look for a caveman hook in
   `~/.claude/settings.json` and a `caveman` server in the Claude MCP config
   (`grep -l caveman` on those files). Already present: mark it done, skip it.
@@ -62,18 +53,11 @@ List each item with its scope, and mark the skipped ones and why:
 1. GitNexus: `gitnexus analyze --skip-agents-md`. The flag keeps it from
    rewriting `CLAUDE.md` and `AGENTS.md`. If `.gitnexus/` already exists, offer
    it as a refresh.
-2. CodeGraph, two parts, each skipped if already done:
-   a. `codegraph install --target <claude id> --location global --yes`
-      registers the MCP server for Claude Code only. Say plainly that this
-      changes the user's global Claude Code config and that
-      `codegraph uninstall` undoes it.
-   b. `codegraph init -y` (non-interactive, takes the defaults) builds
-      `.codegraph/` in this repo. Skip if `.codegraph/` exists already.
-3. Caveman: `caveman hooks install claude` and `caveman mcp install claude`.
+2. Caveman: `caveman hooks install claude` and `caveman mcp install claude`.
    Say plainly that these change the user's global Claude Code config, not only
    this repo, and that `caveman hooks uninstall claude` and
    `caveman mcp uninstall claude` undo them.
-4. MCP for Unity: add one line to the `dependencies` of
+3. MCP for Unity: add one line to the `dependencies` of
    `Packages/manifest.json` (show the exact line and the git diff it will
    produce): `"com.coplaydev.unity-mcp":
    "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#<tag>"`. Take
@@ -83,14 +67,13 @@ List each item with its scope, and mark the skipped ones and why:
    uncommitted: say so. Unity must be reopened or refocused to resolve it, and
    the user then runs `Window > MCP for Unity > Configure All Detected Clients`
    inside Unity: tell them, do not try to do it.
-5. GitHub CLI and git identity: report what was found and what is missing,
+4. GitHub CLI and git identity: report what was found and what is missing,
    with the exact command for the user to run themselves, never run it for
    them: `brew install gh` (or the platform's install), `gh auth login`,
    `git config --global user.name "..."`, `git config --global user.email
    "..."`. Signing in is interactive and handles credentials, so it is always
    the user's step. This item changes nothing, so it needs no approval.
-6. For `.gitnexus` and `.codegraph` that are not ignored: they will show as
-   untracked. Ask on its own whether to add them to `.git/info/exclude` (local,
+5. If `.gitnexus` is not ignored: it will show as untracked. Ask on its own whether to add them to `.git/info/exclude` (local,
    never committed).
 
 State that nothing is committed, and that the only tracked file changed is
@@ -99,16 +82,16 @@ approve only some items: do exactly those.
 
 ## 3. Act
 
-Only after the yes, run the approved items in the order above. The two indexers
-can take a while on a big repo: run them in the background and do not wait on
-them unless the user asked. Append to `.git/info/exclude` only if approved.
+Only after the yes, run the approved items in the order above. The GitNexus
+indexer can take a while on a big repo: run it in the background and do not wait on
+it unless the user asked. Append to `.git/info/exclude` only if approved.
 
 Never commit or push. Never touch a tracked file other than the one approved
 line in `Packages/manifest.json`.
 
 ## 4. Verify
 
-Run `gitnexus status`, `codegraph status` and `caveman status`, for the tools
+Run `gitnexus status` and `caveman status`, for the tools
 that were set up. If one errors, show the error as is and do not claim that
 tool works. A background index still running is "in progress", not a failure.
 For GitHub CLI, the check in step 1 is the verification: report signed in or
@@ -121,6 +104,6 @@ there; whether Unity resolved the package cannot be checked from here.
 One short list: per tool, done, skipped (and why) or failed. Remind the user
 that:
 
-- the GitNexus and CodeGraph refresh hook only fires for commits Claude makes, not for commits made
+- the GitNexus refresh hook only fires for commits Claude makes, not for commits made
   in a terminal or IDE;
 - Caveman may need a new Claude Code session to take effect.

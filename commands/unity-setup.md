@@ -82,8 +82,8 @@ package is not handled here: `/kokodudu:init` adds it.
   the rest (for example the tests folder)?
 - Plugins: is the `kokodudu` marketplace known? Check
   `~/.claude/plugins/known_marketplaces.json` and
-  `~/.claude/settings.json` (`grep -l kokodudu`). Are `.gitnexus/` and
-  `.codegraph/` present (a sign that `/kokodudu:init` was run)?
+  `~/.claude/settings.json` (`grep -l kokodudu`). Is `.gitnexus/`
+  present (a sign that `/kokodudu:init` was run)?
 
 ## 2. Show the plan and ask
 
@@ -117,7 +117,7 @@ Show exactly what will change, mark each item done, skipped (and why) or to do:
    `/plugin marketplace add <path or repo of kokodudu-skills>`,
    `/plugin install kokodudu@kokodudu`, `/plugin install gitnexus@kokodudu`,
    `/plugin install notion-workspace-plugin@kokodudu`, and `/kokodudu:init`
-   (GitNexus, CodeGraph, Caveman, the MCP for Unity package, the `gh` and git
+   (GitNexus, Caveman, the MCP for Unity package, the `gh` and git
    identity check)
 
 State that nothing is committed. Ask with AskUserQuestion: **Confirm** for

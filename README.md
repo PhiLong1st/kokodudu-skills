@@ -12,7 +12,7 @@ git history or your config shows its plan and waits for your approval first.
 | `polish-code` | `/kokodudu:polish-code` | Fixes style violations in the changed code. Ships a bundled C# and Unity style guide. |
 | `unity` | `/kokodudu:unity` | Drives the Unity Editor, Unity CLI first when it is installed, then [MCP for Unity](https://github.com/CoplayDev/unity-mcp): scenes, scripts, tests, console, screenshots. Claude can also load it on its own. |
 | `unity-setup` (command) | `/kokodudu:unity-setup` | Prepares a Unity project: runs Claude's `/init` if there is no `CLAUDE.md`, adds the pinned Unity and OpenUPM packages, the UniTask and UniRx code rules, an `.editorconfig`, and a kokodudu workflow block in `CLAUDE.md` so the agent uses these skills along the project's own flow. Asks for approval, and separately for `manifest.json`. |
-| `init` (command) | `/kokodudu:init` | Sets up GitNexus, CodeGraph and MCP for Unity (this repo), registers CodeGraph and Caveman with your Claude Code config, and checks that the GitHub CLI and git identity needed by `pr` and `commit` are ready. Asks for approval first, and separately for the one tracked-file edit. |
+| `init` (command) | `/kokodudu:init` | Sets up GitNexus and MCP for Unity (this repo), registers Caveman with your Claude Code config, and checks that the GitHub CLI and git identity needed by `pr` and `commit` are ready. Asks for approval first, and separately for the one tracked-file edit. |
 | `about` (command) | `/kokodudu:about` | Read-only summary of the plugin and its commands. Lives in `commands/`, not `skills/`. |
 
 The five skills follow the Agent Skills specification: https://agentskills.io/home
@@ -31,7 +31,7 @@ kokodudu-skills/
 ├── hooks/
 │   ├── hooks.json          # PreToolUse and PostToolUse hooks on Bash
 │   ├── guard-git.sh        # blocks --no-verify and staged secrets on git commit
-│   └── refresh-index.sh    # refreshes GitNexus and CodeGraph after `git commit`
+│   └── refresh-index.sh    # refreshes GitNexus after `git commit`
 ├── evals/                  # cases for `claude plugin eval`, see evals/README.md
 ├── references/             # shared files, read by skills via ${CLAUDE_PLUGIN_ROOT}
 │   ├── pr.txt              # fallback PR body template
@@ -93,7 +93,7 @@ Nothing is copied here, so they follow upstream.
 | `notion-workspace-plugin` | `makenotion/claude-code-notion-plugin` (official Notion skills and MCP server) | `/plugin install notion-workspace-plugin@kokodudu` |
 
 For Notion, sign in once through `/mcp` after installing, then paste a task or
-doc link and Claude can read it. CodeGraph, Caveman and MCP for Unity are
+doc link and Claude can read it. Caveman and MCP for Unity are
 not Claude plugins; `/kokodudu:init` sets them up instead.
 
 ## Hooks
@@ -109,12 +109,11 @@ the `commit` skill stages in a separate call. Needs `jq`; without it the hook
 does nothing.
 
 **`PostToolUse`, `hooks/refresh-index.sh`**: after Claude runs
-`git commit`, it refreshes the indexes in the background:
-`gitnexus analyze --skip-agents-md` and `codegraph sync`. Each one runs only if
-the repo already has its folder (`.gitnexus/`, `.codegraph/`), so run
-`/kokodudu:init` once per repo first. It only sees commits Claude makes, not
-commits from a terminal or IDE. Logs: `.gitnexus/post-commit.log` and
-`.codegraph/post-commit.log`.
+`git commit`, it refreshes the GitNexus index in the background with
+`gitnexus analyze --skip-agents-md`. It runs only if the repo already has
+`.gitnexus/`, so run `/kokodudu:init` once per repo first. It only sees commits
+Claude makes, not commits from a terminal or IDE. Log:
+`.gitnexus/post-commit.log`.
 
 ## Evals
 
