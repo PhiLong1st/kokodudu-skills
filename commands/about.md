@@ -16,7 +16,7 @@ its plan first and waits for an explicit yes.
 | `/kokodudu:commit [TASK-ID]` | Splits changes by topic, writes conventional commits `type(TASK-ID): subject` (subject max 72 chars, no co-author trailer), commits after approval. |
 | `/kokodudu:pr [draft]` | Pushes the branch and opens a PR with the repository's own PR template, after approval. |
 | `/kokodudu:polish-code [path or whole-file]` | Fixes style violations in changed code using the repo's style doc, formatter config or the bundled C# and Unity guide. Does not commit. |
-| `/kokodudu:unity` | Guide for driving the Unity Editor through MCP for Unity: scenes, scripts, tests, console, screenshots. |
+| `/kokodudu:unity` | Drives the Unity Editor, Unity CLI first when installed, then MCP for Unity: scenes, scripts, tests, console, screenshots. |
 | `/kokodudu:unity-setup` | Prepares a Unity project: `CLAUDE.md`, pinned Unity and OpenUPM packages, UniTask and UniRx code rules, `.editorconfig`, and a kokodudu workflow block so the agent uses these skills along the project's flow. Needs approval; `manifest.json` has its own yes. |
 | `/kokodudu:init` | Sets up GitNexus, CodeGraph, Caveman and MCP for Unity, and checks the GitHub CLI and git identity that pr and commit need. GitNexus and CodeGraph are then refreshed by the plugin's hook after every commit Claude makes. Needs approval. |
 | `/kokodudu:about` | This summary. |

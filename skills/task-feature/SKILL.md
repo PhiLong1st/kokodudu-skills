@@ -193,6 +193,7 @@ Gather every remaining decision into one round:
 - **Model and effort** for the dev agent(s) and for the QA agent (S asks only
   about QA). Example: opus/high, sonnet/high, sonnet/medium, haiku/low; put
   your recommendation first
+- **Model and effort** for the independent reviewer (asked for every size)
 - Open technical choices left in the plan, if any
 
 Then present a one-page **Decision Sheet**:
@@ -200,7 +201,7 @@ Then present a one-page **Decision Sheet**:
 - Notion page: updated and confirmed / skipped / no link
 - Frozen spec (summary of the ACs)
 - Phase -> unit list, parallel or sequential
-- Agents: role, model, effort, count
+- Agents: role, model, effort, count (dev, QA, and the final reviewer)
 - Commit rules, test rules, the 3-round fix limit, and the merge target (the
   base branch)
 
@@ -259,10 +260,24 @@ Never lower the test bar to get past a blocker.
 # Finish
 
 1. Run the whole test suite again
-2. Show the table: AC -> matching TCs -> result
-3. List the commits on the branch and anything left over
-4. Ask whether to push and open a PR into the base branch. Wait for the answer before
-   doing it (then use `/kokodudu:pr`)
+2. **Independent review.** Spawn a fresh read-only agent that did not write or
+   test any of the code (no earlier context), with the model and effort from
+   the Decision Sheet. Give it the frozen spec and ACs, the plan, and the diff
+   `git diff <base branch>...HEAD`. Ask it to check, with file and line
+   evidence:
+   - each AC is actually implemented, not only covered by a test
+   - behavior with no test, and any sign of test gaming (invariant rule 3)
+   - changes outside the plan or spec (scope creep)
+   - breaks of the project's own rules (`CLAUDE.md`, `AGENTS.md`)
+
+   It reports **Must** and **Should** items. **Must** items go through the fix
+   loop (dev fixes, QA reruns, same 3-round limit) and the review runs again.
+   **Should** items are listed for the user, who decides. Do not trust the
+   reviewer blindly: verify a finding before acting on it
+3. Show the table: AC -> matching TCs -> result, and the review result
+4. List the commits on the branch and anything left over
+5. Ask whether to push and open a PR into the base branch. Wait for the answer
+   before doing it (then use `/kokodudu:pr`)
 
 ## Never, unless the user explicitly asks
 

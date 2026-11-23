@@ -10,7 +10,7 @@ git history or your config shows its plan and waits for your approval first.
 | `commit` | `/kokodudu:commit` | Splits changes by topic and writes conventional commits (`type(TASK-ID): subject`, subject max 72 chars, no co-author trailer). |
 | `pr` | `/kokodudu:pr` | Pushes the branch and opens a PR using the repository's own PR template. |
 | `polish-code` | `/kokodudu:polish-code` | Fixes style violations in the changed code. Ships a bundled C# and Unity style guide. |
-| `unity` | `/kokodudu:unity` | Guide for driving the Unity Editor through [MCP for Unity](https://github.com/CoplayDev/unity-mcp): scenes, scripts, tests, console, screenshots. Claude can also load it on its own. |
+| `unity` | `/kokodudu:unity` | Drives the Unity Editor, Unity CLI first when it is installed, then [MCP for Unity](https://github.com/CoplayDev/unity-mcp): scenes, scripts, tests, console, screenshots. Claude can also load it on its own. |
 | `unity-setup` (command) | `/kokodudu:unity-setup` | Prepares a Unity project: runs Claude's `/init` if there is no `CLAUDE.md`, adds the pinned Unity and OpenUPM packages, the UniTask and UniRx code rules, an `.editorconfig`, and a kokodudu workflow block in `CLAUDE.md` so the agent uses these skills along the project's own flow. Asks for approval, and separately for `manifest.json`. |
 | `init` (command) | `/kokodudu:init` | Sets up GitNexus, CodeGraph and MCP for Unity (this repo), registers CodeGraph and Caveman with your Claude Code config, and checks that the GitHub CLI and git identity needed by `pr` and `commit` are ready. Asks for approval first, and separately for the one tracked-file edit. |
 | `about` (command) | `/kokodudu:about` | Read-only summary of the plugin and its commands. Lives in `commands/`, not `skills/`. |
@@ -29,7 +29,8 @@ kokodudu-skills/
 │   ├── unity-setup.md
 │   └── init.md
 ├── hooks/
-│   ├── hooks.json          # PostToolUse hook on Bash
+│   ├── hooks.json          # PreToolUse and PostToolUse hooks on Bash
+│   ├── guard-git.sh        # blocks --no-verify and staged secrets on git commit
 │   └── refresh-index.sh    # refreshes GitNexus and CodeGraph after `git commit`
 ├── references/             # shared files, read by skills via ${CLAUDE_PLUGIN_ROOT}
 │   ├── pr.txt              # fallback PR body template
@@ -93,9 +94,19 @@ For Notion, sign in once through `/mcp` after installing, then paste a task or
 doc link and Claude can read it. CodeGraph, Caveman and MCP for Unity are
 not Claude plugins; `/kokodudu:init` sets them up instead.
 
-## Hook
+## Hooks
 
-`hooks/hooks.json` registers a `PostToolUse` hook on `Bash`. After Claude runs
+`hooks/hooks.json` registers two hooks on `Bash`.
+
+**`PreToolUse`, `hooks/guard-git.sh`**: a deterministic guard that does not rely
+on the model remembering the rules. It blocks `git commit` and `git push` with
+`--no-verify`, and blocks `git commit` while a secret-looking file is staged
+(`.env`, private keys, keystores, credential files; `.env.example` is fine).
+Files staged in the same command line as the commit are not visible to it, so
+the `commit` skill stages in a separate call. Needs `jq`; without it the hook
+does nothing.
+
+**`PostToolUse`, `hooks/refresh-index.sh`**: after Claude runs
 `git commit`, it refreshes the indexes in the background:
 `gitnexus analyze --skip-agents-md` and `codegraph sync`. Each one runs only if
 the repo already has its folder (`.gitnexus/`, `.codegraph/`), so run

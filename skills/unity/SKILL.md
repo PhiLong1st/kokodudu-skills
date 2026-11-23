@@ -1,12 +1,36 @@
 ---
 name: unity
 description: Drive the Unity Editor through MCP for Unity (CoplayDev/unity-mcp) - scenes, GameObjects, C# scripts, assets, tests, console and screenshots. Use when working in a Unity project and the unity-mcp tools or mcpforunity:// resources are available. Follows the Agent Skills specification, see https://agentskills.io/home
-compatibility: Designed for Claude Code. Needs a Unity project with the MCP for Unity package and a connected server (uv on PATH). Set up with /kokodudu:init.
+compatibility: Designed for Claude Code. Needs a Unity project with either the Unity CLI (preferred when installed) or the MCP for Unity package and a connected server (uv on PATH). MCP for Unity is set up with /kokodudu:init.
 metadata:
   version: "1.0"
 ---
 
-# Unity through MCP for Unity
+# Unity: CLI first, MCP for Unity second
+
+## Pick the channel first
+
+A mature command-line tool costs fewer tokens than an MCP round trip and works
+against the same Editor, so check for it before using MCP.
+
+1. If the project's `CLAUDE.md`, `AGENTS.md` or the kokodudu block names a
+   channel for a job, follow it
+2. Otherwise, if the Unity CLI exists (`command -v unity`, or
+   `~/.unity/bin/unity`) and `unity status --project-path "$PWD" --format json`
+   lists this project with `state: "ready"`, use the CLI for: status, recompile
+   and compile errors, running tests, reading the console, evaluating C#.
+   Always pass `--project-path "$PWD"` (or the worktree's path), and look up exact
+   commands with `unity command --query <word>` and `unity command <group>
+   <name> --help` instead of guessing
+3. Use MCP for Unity for what the CLI has no command for: scene and GameObject
+   edits, components, prefabs, assets, screenshots. The rest of this file is
+   about that channel
+4. Neither is available: say so and point to `/kokodudu:init`. Do not edit
+   `Packages/manifest.json` from here
+
+A CLI PlayMode run still needs the Editor focused, same as through MCP.
+
+## MCP for Unity
 
 Operating notes for the CoplayDev/unity-mcp tools. Tool names and parameters
 change between releases: when unsure, read the tool's own schema or the upstream
@@ -42,8 +66,12 @@ guessing.
   TextMeshPro, Input System or UI Toolkit is present.
 - Tests: `run_tests` starts a job, `get_test_job` polls it. Report only what the
   job returned.
-- Several Editors open: list them through `mcpforunity://instances` and pick one
-  with `set_active_instance` before anything else.
+- Several Editors open (for example one per worktree): list them first
+  (`mcpforunity://instances`, `unity_instances` in some clients, or `unity
+  status`). Pass `unity_instance` (`Name@hash`) on every call instead of
+  relying on `set_active_instance`, which is shared by everything using the
+  same MCP session, including sub-agents. A call into one Editor queues behind
+  the others
 
 ## A missing tool is not always a broken connection
 
@@ -61,7 +89,7 @@ Before troubleshooting the connection, check:
 | Tools answer "busy" | Compilation or reload in progress | Wait; re-read `mcpforunity://editor/state` |
 | `stale_file` | File changed since the last SHA | Fetch the SHA again with `get_sha`, retry |
 | Connection lost | Domain reload | Wait a few seconds, check state, retry |
-| Commands do nothing | Wrong Editor instance | Check `set_active_instance` |
+| Commands do nothing | Wrong Editor instance | Check the `unity_instance` you passed, or `set_active_instance` |
 
 ## Boundaries
 
@@ -69,6 +97,6 @@ Before troubleshooting the connection, check:
   (hierarchy, files) and leave committing to `/kokodudu:commit`.
 - Match the project's own code style when writing scripts; `/kokodudu:polish-code`
   checks it afterwards.
-- This skill assumes MCP for Unity is already installed and connected. If it is
-  not, say so and point to `/kokodudu:init`; do not edit `Packages/manifest.json`
-  from here.
+- For the MCP channel this skill assumes MCP for Unity is already installed and
+  connected. If it is not and the CLI is not available either, say so and point
+  to `/kokodudu:init`; do not edit `Packages/manifest.json` from here.
