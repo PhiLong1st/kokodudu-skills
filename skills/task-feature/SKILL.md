@@ -28,12 +28,13 @@ questions into one round to cut waiting.
 
 ## Core principle: lock everything, then build
 
-- Two phases: **Preparation** (Gate 0 to Gate 5) and **Execution**
+- Two phases: **Preparation** (Gate 0 to Gate 5, or Gate 0, 1, 3 and the S Sheet
+  for size S) and **Execution**
 - During Preparation every document, plan and decision must get the user's
   **"Confirm"**. No production code is changed in this phase (the Notion spec update in
   Gate 3 is the only write outside the new branch)
 - Execution starts only after the user confirms the **Decision Sheet**
-  (Gate 5)
+  (Gate 5) or, for size S, the **S Sheet**
 - During Execution, make no new decisions beyond what was locked. Stop and ask
   only for a blocker listed in "When you may stop"
 
@@ -48,7 +49,7 @@ questions into one round to cut waiting.
    failing
 4. Dev never edits QA's test files. QA never edits production code
 5. Each small step is its own commit, made with the `kokodudu:commit` skill.
-   After Gate 5, commits that follow the confirmed plan need no per-commit
+   After Gate 5 (or the S Sheet), commits that follow the confirmed plan need no per-commit
    approval (the Decision Sheet covers them); anything outside the plan goes
    through the normal commit approval. Never mix purposes in one commit, never commit straight to the base branch
 6. No push, no PR, nothing touched on the base branch or `main` unless the user asks. The **base branch** is `dev`, or the branch the user names in Gate 0 when `dev` does not exist
@@ -113,17 +114,39 @@ questions into one round to cut waiting.
 
 | Size | Suggested criteria | Gate 2 (proposal) | Execution |
 |---|---|---|---|
-| **S** | up to ~2h, 1-3 files, one system | Orchestrator reviews itself, no agent | Orchestrator codes; QA is one separate agent (writes tests and verifies) |
+| **S** | up to ~2h, 1-3 files, one system | S Sheet: you review, no agent, one confirmation | Orchestrator codes; QA is one separate agent (writes tests and verifies) |
 | **M** | a few systems, up to ~1 day | 1 read-only agent | 1 dev agent + 1 QA agent in parallel |
 | **L** | many systems, over 1 day, clearly independent parts | 1 read-only agent | Up to 2 dev agents per phase + 1 QA agent |
 
 Keep the spec exactly as the Notion page states it; that text is the baseline
-for Gate 3. The user confirms the spec and the size in the same round.
+for Gate 3. The user confirms the spec and the size in the same round. Size S
+then takes the fast path below; M and L continue with Gate 2.
 
-## Gate 2: Review and proposals (loop)
+## Size S fast path (replaces Gates 2, 4 and 5)
 
-- S: you review yourself. M/L: spawn 1 read-only agent (Explore or Plan),
-  choose a reasonable model and effort, and tell the user in one line
+A small task does not need three more rounds. After Gate 1, present one **S
+Sheet**. No code is changed before the user confirms it, and plan mode is
+skipped because the plan is short:
+- **Self-review** (you, no agent): at most 3 proposals grouped Must / Should /
+  Could, each with reason, repo evidence and effect on the ACs
+- **Plan**: one phase, the files, the commits (small steps), and the test cases
+  mapped to the ACs (TC-1.n -> ACx), with type and how to run. Every AC has a
+  test case. Definition of Done as in Gate 4
+- **Decisions**: model and effort for the QA agent and for the final reviewer,
+  with your recommendation first; open technical choices if any
+- Branch, base branch, task ID, the frozen spec summary, and the same commit,
+  test and 3-round rules as the Decision Sheet
+
+Ask in one round: which proposals to accept, then **Confirm & start** / **Edit**.
+If accepted proposals changed the spec and a Notion link was given, run Gate 3
+before starting; otherwise start on **Confirm & start**. If the work turns out
+to be larger than S (new systems, more files), stop and offer to switch to M or
+L through the full gates. Every invariant rule still applies.
+
+## Gate 2: Review and proposals (loop, sizes M and L)
+
+- Spawn 1 read-only agent (Explore or Plan), choose a reasonable model and
+  effort, and tell the user in one line
 - Required output:
   - Proposals grouped as **Must** (spec gap or bug risk), **Should** (clear
     improvement), **Could** (nice to have)
@@ -142,8 +165,8 @@ for Gate 3. The user confirms the spec and the size in the same round.
 
 ## Gate 3: Update the Notion page
 
-Runs only when a Notion link was given AND Gate 2 changed the spec (any
-accepted improvement or proposal). Otherwise skip it and say so in one line.
+Runs only when a Notion link was given AND Gate 2 (or the S Sheet) changed the
+spec (any accepted improvement or proposal). Otherwise skip it and say so in one line.
 The task is not started before this gate is done.
 
 1. Show the update as before -> after for each changed part of the page, built
@@ -210,52 +233,12 @@ Execution.
 
 ---
 
-# EXECUTION: loop per phase (sequential)
+# EXECUTION
 
-**A. Start**
-- **QA** (1 agent, reused across all phases with SendMessage): writes the tests
-  for the current phase, only in test files, commits with `kokodudu:commit`.
-  Runs in parallel with dev
-- **Dev**:
-  - S: the orchestrator codes
-  - M: 1 dev agent
-  - L: 1-2 dev agents per the plan; agents running in parallel each work in
-    their own worktree (`isolation: "worktree"`)
-
-  Brief each agent fully: spec, the unit's plan, files it may edit, files it
-  must not touch, commit rules, invariant rule 3, and the project rules it must
-  follow (invariant rule 9). When done it reports back:
-  the commits, the files changed, how it checked its work
-
-**B. Orchestrator integrates**: review the diff against the plan and the
-conventions (send back to dev to fix if needed), merge worktrees into the
-feature branch, resolve conflicts, run `kokodudu:polish-code` on the changed
-files (its fixes are their own commit), make sure it builds and compiles
-
-**C. QA verifies**: run this phase's tests + every earlier phase's tests + the
-existing suite. Use the project's own build and test commands (README, a
-project instruction file, or a script); never invent one. Report per TC:
-pass/fail, actual vs expected, logs, repro steps
-
-**D. Fix loop**: on a failing test, pass QA's report to the right dev; dev
-fixes and commits; orchestrator merges again; QA reruns
-
-**E. Phase gate**: move to the next phase only when QA reports all green.
-Summarize the phase for the user in one paragraph (what was done, the commits,
-the test results). No confirmation needed, keep going
-
-## When you may stop
-
-Stop and ask the user only in these cases. State the problem, what was tried,
-and the options:
-- A phase fails **3 rounds in a row**
-- QA believes a test case is wrong, or an AC must be read differently
-- Something outside the locked plan or spec is needed (files or systems out of
-  scope, an architecture change, a new dependency)
-- An environment error you cannot fix yourself (build, Unity license, test
-  runner)
-
-Never lower the test bar to get past a blocker.
+Read `${CLAUDE_PLUGIN_ROOT}/references/task-feature-execution.md` now and follow
+it. It holds the per-phase loop (start, integrate, verify, fix loop, phase gate)
+and "When you may stop". The invariant rules above apply to every step in it.
+When every phase is green, go to Finish.
 
 # Finish
 
@@ -274,14 +257,20 @@ Never lower the test bar to get past a blocker.
    loop (dev fixes, QA reruns, same 3-round limit) and the review runs again.
    **Should** items are listed for the user, who decides. Do not trust the
    reviewer blindly: verify a finding before acting on it
-3. Show the table: AC -> matching TCs -> result, and the review result
-4. List the commits on the branch and anything left over
-5. Ask whether to push and open a PR into the base branch. Wait for the answer
+3. **Lessons** (skip if nothing repeated). If a failure class came back, or the
+   reviewer found the same kind of problem twice, propose 1-3 short rules for
+   the project's `CLAUDE.md`: the principle and the reason, not the example.
+   Show them and ask **Confirm** / **Edit** / **Skip**. Write only after a
+   Confirm, only into the project's `CLAUDE.md`, as a separate commit made with
+   `kokodudu:commit`. Never edit this plugin's files from here
+4. Show the table: AC -> matching TCs -> result, and the review result
+5. List the commits on the branch and anything left over
+6. Ask whether to push and open a PR into the base branch. Wait for the answer
    before doing it (then use `/kokodudu:pr`)
 
 ## Never, unless the user explicitly asks
 
-Confirm a gate for the user, edit production code before Gate 5, push, open a
+Confirm a gate for the user, edit production code before Gate 5 (or the S Sheet), push, open a
 PR, touch the base branch or `main`, commit straight to the base branch, write
 to Notion without a Confirm (only the Gate 3 spec update is allowed), skip or
 weaken tests, change files outside the plan.

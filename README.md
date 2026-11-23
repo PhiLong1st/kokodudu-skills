@@ -32,9 +32,11 @@ kokodudu-skills/
 │   ├── hooks.json          # PreToolUse and PostToolUse hooks on Bash
 │   ├── guard-git.sh        # blocks --no-verify and staged secrets on git commit
 │   └── refresh-index.sh    # refreshes GitNexus and CodeGraph after `git commit`
+├── evals/                  # cases for `claude plugin eval`, see evals/README.md
 ├── references/             # shared files, read by skills via ${CLAUDE_PLUGIN_ROOT}
 │   ├── pr.txt              # fallback PR body template
 │   ├── csharp-unity.md     # bundled C# and Unity style guide
+│   ├── task-feature-execution.md # execution loop, read by task-feature
 │   ├── unity-code-rules.md # UniTask and UniRx rules for unity-setup
 │   ├── unity-workflow.md   # kokodudu workflow block for unity-setup
 │   └── .editorconfig
@@ -113,6 +115,11 @@ the repo already has its folder (`.gitnexus/`, `.codegraph/`), so run
 `/kokodudu:init` once per repo first. It only sees commits Claude makes, not
 commits from a terminal or IDE. Logs: `.gitnexus/post-commit.log` and
 `.codegraph/post-commit.log`.
+
+## Evals
+
+`evals/` holds cases for `claude plugin eval` that check the approval gates of
+`commit` and `polish-code`. See `evals/README.md` for how to run them.
 
 ## Notes
 

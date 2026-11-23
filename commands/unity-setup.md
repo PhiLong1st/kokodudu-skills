@@ -22,6 +22,7 @@ The shared files this command copies from live in the plugin:
 | Code rules | Appends the UniTask and UniRx rules to `CLAUDE.md` when those packages are present and the rules are not. |
 | .editorconfig | Copies the plugin's `.editorconfig` when the project has none. |
 | Workflow block | Writes the kokodudu workflow block into `CLAUDE.md` (between `<!-- kokodudu:start -->` and `<!-- kokodudu:end -->`) so the agent uses the kokodudu skills along the project's own flow. |
+| Invariants | Proposes a short "Invariants" section for `CLAUDE.md` (what must stay true: architecture rules, boundaries, non-negotiables) built from the project's own docs, plus optional `CLAUDE.md` files for subfolders such as the tests. Written only after the user confirms the exact text. |
 | Plugins and init | Tells the user the `/plugin` and `/kokodudu:init` commands to run. Check only. |
 
 Packages (all pinned, none installed unless missing):
@@ -72,6 +73,13 @@ package is not handled here: `/kokodudu:init` adds it.
     leave it out
   - other rules the project states for agents (for example GitNexus
     impact-analysis rules): do not copy them, the block only points at them
+- **Invariants**: does `CLAUDE.md` already have a section about architecture
+  rules, boundaries or non-negotiables? Read what states them: `docs/`
+  (architecture, design, guides), the assembly layout (`*.asmdef` names and
+  their references), `README.md`. Collect only rules the sources actually state
+  (for example "feature code does not reference the editor assembly"), each with
+  its source file. Which subfolders have their own conventions that differ from
+  the rest (for example the tests folder)?
 - Plugins: is the `kokodudu` marketplace known? Check
   `~/.claude/plugins/known_marketplaces.json` and
   `~/.claude/settings.json` (`grep -l kokodudu`). Are `.gitnexus/` and
@@ -97,7 +105,14 @@ Show exactly what will change, mark each item done, skipped (and why) or to do:
    from step 1 (a line with no known value is removed, never invented), and
    say whether it is added at the end of `CLAUDE.md` or replaces the existing
    kokodudu block. The block never changes anything outside its markers
-6. **Plugins and init** (check only, nothing changes): the commands for the
+6. **Invariants** (own question): show the exact text of the proposed section,
+   3 to 8 short lines, each ending with its source in parentheses. Only rules
+   the project's own files state; never invent one, and say when fewer than 3
+   were found. Mark each as "stated" or "inferred from the asmdef layout". Also
+   show, if worth it, the exact text for a subfolder `CLAUDE.md` (for example
+   `Assets/Scripts/Tests/CLAUDE.md`). Skip the item when `CLAUDE.md` already has
+   such a section. The user can remove or edit lines before confirming
+7. **Plugins and init** (check only, nothing changes): the commands for the
    user to run themselves, for what is missing:
    `/plugin marketplace add <path or repo of kokodudu-skills>`,
    `/plugin install kokodudu@kokodudu`, `/plugin install gitnexus@kokodudu`,
@@ -106,8 +121,8 @@ Show exactly what will change, mark each item done, skipped (and why) or to do:
    identity check)
 
 State that nothing is committed. Ask with AskUserQuestion: **Confirm** for
-items 1, 3, 4, 5 and a separate question for item 2 (**Confirm** / **Skip** /
-**Cancel**). The user may approve only some items: do exactly those. Only a
+items 1, 3, 4, 5, a separate question for item 2, and another for item 6
+(each **Confirm** / **Skip** / **Cancel**). The user may approve only some items: do exactly those. Only a
 Confirm counts.
 
 ## 3. Act
@@ -120,6 +135,8 @@ Only after the yes, in the order above.
   result must stay valid JSON
 - Append to `CLAUDE.md` with Edit or Write; never rewrite or reorder what is
   already there. A replaced kokodudu block keeps everything outside its markers
+- Invariants: append the confirmed section to `CLAUDE.md` exactly as shown. A
+  subfolder `CLAUDE.md` is created only if it does not exist and was confirmed
 - Never commit or push. Never change a package version that already exists
 
 ## 4. Verify
